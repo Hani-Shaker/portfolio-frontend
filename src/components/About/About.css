@@ -1,0 +1,35 @@
+.who-me .left-who-me::after,
+.who-me .left-who-me::before{
+    content: "";
+    position: absolute;    
+}
+.who-me .left-who-me::after{
+    bottom: -20px;
+    right: -20px;
+    border-right: 10px solid var(--color3);
+    border-bottom: 10px solid var(--color3);
+    width: 100px;
+    height: 100px;
+}
+.who-me .left-who-me::before{
+    left: -20px;
+    top: -20px;
+    border-top: 10px solid var(--color3);
+    border-left: 10px solid var(--color3);
+    width: 100px;
+    height: 100px;
+}
+.who-me .right-who-me span{
+    color: var(--text-disable);
+}
+
+@media (max-width:760px) {
+    .who-me {
+        flex-direction: column;
+        text-align: center;
+    }
+    .who-me .left-who-me,
+    .who-me .right-who-me {
+        width: 100%;
+    }
+}

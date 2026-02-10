@@ -1,0 +1,71 @@
+.achievements{
+    background-color: var(--bg-color);
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.achievements::before{
+    position: absolute;
+    content: '';
+    background-color: var(--color3);
+    box-shadow: 0px 0px 150px 50px var(--color3);
+    bottom: 0;
+    right: 0;
+    border-radius: 50%;
+}
+.achievements::after{
+    position: absolute;
+    content: '';
+    background-color: var(--color3);
+    box-shadow: 0px 0px 150px 50px var(--color3);
+    left: 0;
+    top: 0;
+    border-radius: 50%;
+}
+
+.progress{
+    background: var(--bg-color);
+    background-color: var(--color3);
+}
+.progress .value-progress{
+    top: -30px;
+    right: -25px;
+    width: 50px;
+    height: 20px;
+    background-color: var(--color3);
+    color: var(--bg-color);
+    box-shadow: 2px 2px 15px 0 rgba(3, 115, 129, 0.922) inset;
+    /* text-align: center; */
+    display: flex;
+    justify-content: center;
+    border-radius: 20px;
+    font-weight: bold;    
+}
+
+.services .service{
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+@keyframes servicesAnimation {
+    0%{
+        transform: translate(0, 0);
+    }
+    100% {
+        transform: translate(-200px, -200px);
+    }
+}
+.services .service::before{
+    position: absolute;
+    content: '';
+    background-color: var(--color3);
+    box-shadow: 0px 0px 150px 50px var(--color3), -200px -200px 200px 50px var(--color3);
+    bottom: 0;
+    right: 0;
+    border-radius: 50%;
+    animation: servicesAnimation 10s ease-in-out both infinite alternate;
+}
+.service p{
+    color: var(--text-disable);
+}

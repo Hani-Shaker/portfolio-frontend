@@ -1,0 +1,63 @@
+.nav-bar {
+  box-shadow: 0 0 10px 0 var(--color3);
+}
+
+.nav-bar button{
+    cursor: pointer;
+}
+.nav-bar .btns button{
+  border: 2px solid var(--color3);
+  transition: .3s;
+}
+.nav-bar .btns button:hover{
+  background-color:var(--color3);
+}
+.nav-links a:hover{
+  color: var(--color3) !important;
+}
+.small-nav{
+  display: none;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width:795px) {
+  .small-nav{
+    display: inline-block;
+  }
+  .nav-bar .nav-links{
+    height: 0;
+    overflow: hidden;
+    width: 100%;
+    background: var(--gradient-card);       
+    background-size: 300% 300%;
+    animation: gradient-animation 10s ease infinite;
+    position: absolute;
+    top: 80px;
+    left: 0;
+    flex-direction: column;
+    transition: .7s;
+  }
+  .nav-links .nav-section ul{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .nav-bar .small-nav-active{
+    height: fit-content;
+    padding: 20px;
+  }
+}
