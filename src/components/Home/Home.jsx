@@ -6,9 +6,9 @@ import { useState } from "react";
 
 function Home() {
     const projects = [
-    { id: "1", title: "E-commerce", urlImg: "../../../images/project10.png", repo:"https://github.com/Hani-Shaker/E-commerce", view:"https://e-commerce-inter.netlify.app/", category: "website", body:"E-commerce website for anything you need."},
-    { id: "2", title: "workshop", urlImg: "../../../images/project2.png", repo:"https://github.com/Hani-Shaker/workshop", view:"https://hani-shaker.github.io/workshop/", category: "app", body:"A desktop program specifically designed for those who repair devices for their clients by documenting the repair process."},  
-    { id: "3", title: "Shoes Shop", urlImg: "../../../images/project3.png", repo:"https://github.com/Hani-Shaker/project-4", view:"https://hani-shaker.github.io/project-4/", category: "website", body:"Selling the best types of devices"},
+    { id: "1", title: "E-commerce", urlImg: "", repo:"https://github.com/Hani-Shaker/E-commerce", view:"https://e-commerce-inter.netlify.app/", category: "website", body:"E-commerce website for anything you need."},
+    { id: "2", title: "workshop", urlImg: "", repo:"https://github.com/Hani-Shaker/workshop", view:"https://hani-shaker.github.io/workshop/", category: "app", body:"A desktop program specifically designed for those who repair devices for their clients by documenting the repair process."},  
+    { id: "3", title: "Shoes Shop", urlImg: "", repo:"https://github.com/Hani-Shaker/project-4", view:"https://hani-shaker.github.io/project-4/", category: "website", body:"Selling the best types of devices"},
   ];
   const mediaItems = [
     { id: "facebook", url: "https://www.facebook.com/hany.hany.955312?rdid=mrUgFZTu92y69E3N&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1XJZShHphQ%2F#" , icon:"fab fa-facebook-f"},
