@@ -22,7 +22,7 @@ function SurveyModal({ onComplete }) {
 
   const userTypes = [
     { value: "client", label: "عميل محتمل", icon: "fa-shopping-cart", desc: "أبحث عن خدمات" },
-    { value: "business", label: "صاحب شركة", icon: "fa-briefcase", desc: "أبحث عن شراكات" },
+    { value: "business", label: "صاحب شركة", icon: "fa-briefcase", desc: "أبحث عن موظف" },
     { value: "visitor", label: "زائر", icon: "fa-eye", desc: "أتصفح فقط" },
     { value: "developer", label: "مطور", icon: "fa-code", desc: "أبحث عن أفكار" }
   ];
