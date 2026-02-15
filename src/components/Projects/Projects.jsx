@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "./Projects.css";
+import { ProjectSkeleton } from '../Skeleton/Skeleton';
 
 function Projects() {
   const [projects, setProjects] = useState([]);
@@ -9,14 +10,23 @@ function Projects() {
   const [views, setViews] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
+    const categories = [
+    { value: 'all', label: 'All' },
+    { value: 'Full Stack', label: 'Full Stack' },
+    { value: 'Frontend', label: 'Frontend' },
+    { value: 'Backend', label: 'Backend' },
+    { value: 'Mobile', label: 'Mobile' }
+  ];
   useEffect(() => {
     fetchProjects();
   }, []);
 
   const fetchProjects = async () => {
-    try {
       setLoading(true);
+    try {
       const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
       const res = await fetch(`${API_URL}api/projects`);      
       if (!res.ok) {
@@ -48,6 +58,8 @@ function Projects() {
       console.error("❌ Error fetching projects:", error);
       setError(error.message);
       setLoading(false);
+    }finally {
+      setLoading(false); // ✅
     }
   };
 
@@ -60,45 +72,45 @@ function Projects() {
     return userId;
   };
 
-  const handleLike = async (projectId) => {
-    const userId = getUserId();
+const handleLike = async (projectId) => {
+  const userId = getUserId();
+  
+  try {
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+    const res = await fetch(`${API_URL}/api/projects?id=${projectId}&action=like`, {  // ✅
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId })
+    });
+    
+    const data = await res.json();
+    
+    setLikes(prev => ({
+      ...prev,
+      [projectId]: { count: data.likes, liked: data.liked }
+    }));
+  } catch (error) {
+    console.error(error);
+  }
+};
 
-    try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
-      const res = await fetch(`${API_URL}api/projects/${projectId}/like`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId })
-      });
-      
-      const data = await res.json();
-
-      setLikes(prev => ({
-        ...prev,
-        [projectId]: { count: data.likes, liked: data.liked }
-      }));
-    } catch (error) {
-      console.error("❌ Error toggling like:", error);
-    }
-  };
-
-  const handleView = async (projectId) => {
-    try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
-      const res = await fetch(`${API_URL}api/projects/${projectId}/view`, {
-        method: "POST"
-      });
-      
-      const data = await res.json();
-      
-      setViews(prev => ({
-        ...prev,
-        [projectId]: data.views
-      }));
-    } catch (error) {
-      console.error("❌ Error incrementing view:", error);
-    }
-  };
+const handleView = async (projectId) => {
+  try {
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+    const res = await fetch(`${API_URL}/api/projects?id=${projectId}&action=view`, {  // ✅
+      method: "POST"
+    });
+    
+    const data = await res.json();
+    
+    setViews(prev => ({
+      ...prev,
+      [projectId]: data.views
+    }));
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   const viewMore = (id) => {
     setOpenId(prev => prev === id ? null : id);
@@ -112,14 +124,30 @@ function Projects() {
   // حالة التحميل
   if (loading) {
     return (
-      <section id="projects" className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-[#19cee6] mx-auto mb-4"></div>
-          <p className="text-xl">Loading projects...</p>
+      <section id="projects">
+        <h2>Projects</h2>
+        <div className="projects-cont">
+          {[1, 2, 3].map(i => (
+            <ProjectSkeleton key={i} />
+          ))}
         </div>
       </section>
     );
   }
+
+    const filteredProjects = projects.filter(project => {
+    // فلترة حسب الفئة
+    const matchesCategory = selectedCategory === 'all' || 
+                           project.category === selectedCategory;
+    
+    // فلترة حسب البحث
+    const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         project.tools.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         project.body.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    return matchesCategory && matchesSearch;
+  });
+
 
   // حالة الخطأ
   if (error) {
@@ -153,13 +181,45 @@ function Projects() {
 
   return (
     <section id="projects">
-      <h2 className="font-bold text-4xl text-center h-40 flex items-center justify-center">
-        Projects ({projects.length})
-      </h2>
-      
+      <h2 className="font-bold text-4xl text-center h-40 flex items-center justify-center">Projects ({filteredProjects.length})</h2>
+      {/* شريط البحث والفلترة */}
+      <div className="projects-filters">
+        {/* البحث */}
+        <div className="search-box">
+          <i className="fas fa-search"></i>
+          <input
+            type="text"
+            placeholder="ابحث عن مشروع..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button 
+              className="clear-search"
+              onClick={() => setSearchTerm('')}
+            >
+              <i className="fas fa-times"></i>
+            </button>
+          )}
+        </div>
+
+        {/* فلاتر الفئات */}
+        <div className="category-filters">
+          {categories.map(cat => (
+            <button
+              key={cat.value}
+              className={`filter-btn ${selectedCategory === cat.value ? 'active' : ''}`}
+              onClick={() => setSelectedCategory(cat.value)}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="projects-cont w-9/10 mx-auto py-20 flex flex-wrap flex-col justify-center items-center gap-15">
-        {projects.slice(0, visibleCount).map(item => (
-          <div 
+        {filteredProjects.slice(0, visibleCount).map(item => (
+          <div
             key={item._id} 
             className="project w-80 transition hover:scale-105 rounded-4xl overflow-hidden flex justify-center flex-col relative"
           >

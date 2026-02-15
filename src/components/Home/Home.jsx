@@ -81,7 +81,7 @@ function Home() {
               <span className="text-[#19cee6]">0</span>
             </div>
             <div className="top-product relative flex justify-center items-center overflow-hidden w-100">
-              <img src={item.urlImg} alt="img" className='project-img rounded-4xl'/>
+              {/* <img src={item.urlImg} alt="img" className='project-img rounded-4xl'/> */}
             </div>
             <div className={`project-body flex flex-col gap-1 p-3 ${openId === item.id ? "expanded" : ""}`}>
               <div className=" h-9/12">

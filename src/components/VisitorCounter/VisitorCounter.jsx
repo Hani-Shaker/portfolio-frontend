@@ -9,18 +9,18 @@ function VisitorCounter() {
     fetchVisitorCount();
   }, []);
 
-  const fetchVisitorCount = async () => {
-    try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
-      const res = await fetch(`${API_URL}api/survey/visitor-count`);
-      const data = await res.json();
-      setCount(data.totalVisitors);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching visitor count:", error);
-      setLoading(false);
-    }
-  };
+const fetchVisitorCount = async () => {
+  try {
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+    const res = await fetch(`${API_URL}api/survey/visitor-count`);
+    const data = await res.json();
+    setCount(data.totalVisitors);
+    setLoading(false);
+  } catch (error) {
+    console.error("Error:", error);
+    setLoading(false);
+  }
+};
 
   if (loading) return null;
 

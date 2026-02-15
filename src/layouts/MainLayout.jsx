@@ -1,15 +1,17 @@
-import Navbar from '../components/Navbar/Navbar.jsx';
 import { Outlet } from 'react-router-dom';
+import Navbar from '../components/Navbar/Navbar';
+import ThemeToggle from '../components/ThemeToggle/ThemeToggle.jsx'; // ✅
 
-const MainLayout = () => {
+function MainLayout() {
   return (
     <>
+      <ThemeToggle /> {/* ✅ */}
       <Navbar />
       <main>
-        <Outlet /> 
+        <Outlet />
       </main>
     </>
   );
-};
+}
 
 export default MainLayout;
