@@ -361,7 +361,7 @@ const handleDelete = async (projectId) => {
                           alt={project.title} 
                           className="project-thumb" 
                           onError={(e) => {
-                            e.target.src = 'https://via.placeholder.com/60?text=No+Image';
+                            e.target.src = '';
                           }}
                         />
                       ) : (
