@@ -38,7 +38,7 @@ function Projects() {
     setError(null);
     
     try {
-      const res = await fetch(getApiUrl('api/projects'));  // ✅
+      const res = await fetch(getApiUrl('/api/projects'));  // ✅
       
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
@@ -84,7 +84,7 @@ function Projects() {
     const userId = getUserId();
     
     try {
-      const res = await fetch(getApiUrl(`api/projects-like?id=${projectId}`), {  // ✅
+      const res = await fetch(getApiUrl(`/api/projects-like?id=${projectId}`), {  // ✅
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId })
@@ -108,7 +108,7 @@ function Projects() {
 
   const handleView = async (projectId) => {
     try {
-      const res = await fetch(getApiUrl(`api/projects-view?id=${projectId}`), {  // ✅
+      const res = await fetch(getApiUrl(`/api/projects-view?id=${projectId}`), {  // ✅
         method: "POST"
       });
       
