@@ -1,14 +1,8 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import './SurveyModal.css';
+import { getApiUrl } from '../../utils/api';
 
-// ✅ Helper function
-const getApiUrl = (endpoint) => {
-  const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
-  const cleanUrl = baseUrl.replace(/\/$/, '');
-  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  return `${cleanUrl}${cleanEndpoint}`;
-};
 
 function SurveyModal({ onComplete }) {
   const [formData, setFormData] = useState({
@@ -36,7 +30,7 @@ function SurveyModal({ onComplete }) {
     setLoading(true);
 
     try {
-      const res = await fetch(getApiUrl('/api/survey-submit'), {  // ✅ الرابط الصحيح
+      const res = await fetch(getApiUrl('/api/survey-submit'), {  // ✅
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

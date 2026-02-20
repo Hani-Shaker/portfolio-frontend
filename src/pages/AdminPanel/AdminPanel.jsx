@@ -1,15 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
+import { getApiUrl } from '../../utils/api';
 import './AdminPanel.css';
 
 function AdminPanel() {
   const [projects, setProjects] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
-  const [adminToken, setAdminToken] = useState(localStorage.getItem('adminToken') || '');
+  const [adminToken, setAdminToken] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+  const [pageLoading, setPageLoading] = useState(true);
+
   const [formData, setFormData] = useState({
     title: '',
     tools: '',
@@ -20,46 +22,55 @@ function AdminPanel() {
     urlImg: ''
   });
 
+  // ✅ عند تحميل الصفحة - بس نشوف لو في Token
   useEffect(() => {
-    if (adminToken) {
+    const savedToken = localStorage.getItem('adminToken');
+    if (savedToken) {
+      setAdminToken(savedToken);
       setIsAuthenticated(true);
-      fetchProjects();
     }
-  }, [adminToken]);
+    setPageLoading(false);
+  }, []);
 
-  const fetchProjects = async () => {
+
+  const fetchProjects = useCallback(async () => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
-      const res = await fetch(`${API_URL}api/projects`);
-      
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-      
+      const res = await fetch(getApiUrl('/api/projects'));
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
       const data = await res.json();
-      console.log('✅ Projects loaded:', data);
+      console.log('✅ Projects loaded:', data.length);
       setProjects(data);
     } catch (error) {
-      console.error('❌ Fetch projects error:', error);
+      console.error('❌ Fetch error:', error);
       toast.error('فشل جلب المشاريع');
     }
-  };
+  }, []);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchProjects();
+    }
+  }, [isAuthenticated, fetchProjects]);
+
+  // ✅ تسجيل الدخول - بس نحفظ الـ Token
   const handleLogin = (e) => {
     e.preventDefault();
-    const token = e.target.token.value;
-    
+    const token = e.target.token.value.trim();
+
     if (!token) {
       toast.error('من فضلك أدخل Token');
       return;
     }
-    
+
     localStorage.setItem('adminToken', token);
     setAdminToken(token);
     setIsAuthenticated(true);
-    toast.success('تم تسجيل الدخول');
+    toast.success('تم تسجيل الدخول! 🎉');
   };
 
+  // ✅ تسجيل الخروج
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     setAdminToken('');
@@ -68,97 +79,63 @@ function AdminPanel() {
     toast.success('تم تسجيل الخروج');
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  if (!formData.title || !formData.category) {
-    toast.error('العنوان والفئة مطلوبان');
-    return;
-  }
-  
-  setLoading(true);
-  
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
-  
-  // ✅ تحديد الـ URL
-  const url = editingProject 
-    ? `${API_URL}api/projects?id=${editingProject._id}`  // ✅ Query param
-    : `${API_URL}api/projects`;
-  
-  const method = editingProject ? 'PUT' : 'POST';
+  // ✅ لو الـ Token غلط، Backend هيرجع 401/403 وهنعمل logout تلقائي
+  const handleApiError = (status) => {
+    if (status === 401 || status === 403) {
+      toast.error('انتهت الجلسة، سجل دخول مرة أخرى');
+      handleLogout();
+      return true;
+    }
+    return false;
+  };
 
-  console.log('📤 Request:', { url, method });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
-    const res = await fetch(url, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${adminToken}`
-      },
-      body: JSON.stringify(formData)
-    });
-
-    console.log('📥 Status:', res.status);
-
-    let data;
-    const contentType = res.headers.get('content-type');
-    
-    if (contentType?.includes('application/json')) {
-      data = await res.json();
-    } else {
-      const text = await res.text();
-      console.error('❌ Response:', text);
-      throw new Error('استجابة غير صحيحة من السيرفر');
+    if (!formData.title || !formData.category) {
+      toast.error('العنوان والفئة مطلوبان');
+      return;
     }
 
-    console.log('📥 Data:', data);
+    setLoading(true);
 
-    if (res.ok) {
-      toast.success(data.message || 'تم بنجاح!');
-      await fetchProjects();
-      resetForm();
-    } else {
-      toast.error(data.message || `خطأ ${res.status}`);
-    }
-  } catch (error) {
-    console.error('❌ Error:', error);
-    toast.error(error.message);
-  } finally {
-    setLoading(false);
-  }
-};
+    const url = editingProject
+      ? getApiUrl(`/api/projects?id=${editingProject._id}`)
+      : getApiUrl('/api/projects');
 
-const handleDelete = async (projectId) => {
-  if (!window.confirm('هل أنت متأكد؟')) return;
-  
-  setLoading(true);
+    const method = editingProject ? 'PUT' : 'POST';
 
-  try {
-    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
-    const res = await fetch(`${API_URL}api/projects?id=${projectId}`, {  // ✅
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${adminToken}`
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminToken}`
+        },
+        body: JSON.stringify(formData)
+      });
+
+      // ✅ لو الـ Token غلط
+      if (handleApiError(res.status)) return;
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success(data.message || 'تم بنجاح!');
+        await fetchProjects();
+        resetForm();
+      } else {
+        toast.error(data.message || `خطأ ${res.status}`);
       }
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      toast.success(data.message);
-      await fetchProjects();
-    } else {
-      toast.error(data.message);
+    } catch (error) {
+      console.error('❌ Error:', error);
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
-  } catch  {
-    toast.error('فشل الحذف');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
   const handleEdit = (project) => {
-    console.log('✏️ Editing project:', project);
     setEditingProject(project);
     setFormData({
       title: project.title || '',
@@ -172,7 +149,37 @@ const handleDelete = async (projectId) => {
     setShowForm(true);
   };
 
+  const handleDelete = async (projectId) => {
+    if (!window.confirm('هل أنت متأكد من حذف هذا المشروع؟')) return;
 
+    setLoading(true);
+
+    try {
+      const res = await fetch(getApiUrl(`/api/projects?id=${projectId}`), {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${adminToken}`
+        }
+      });
+
+      // ✅ لو الـ Token غلط
+      if (handleApiError(res.status)) return;
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success(data.message || 'تم الحذف');
+        await fetchProjects();
+      } else {
+        toast.error(data.message || 'فشل الحذف');
+      }
+    } catch (error) {
+      console.error('❌ Delete error:', error);
+      toast.error('فشل الحذف');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -188,12 +195,24 @@ const handleDelete = async (projectId) => {
     setShowForm(false);
   };
 
-  // صفحة تسجيل الدخول
+  // ✅ Loading أثناء تحميل الصفحة
+  if (pageLoading) {
+    return (
+      <div className="admin-loading">
+        <i className="fas fa-spinner fa-spin text-4xl text-[#19cee6]"></i>
+        <p>جاري التحميل...</p>
+      </div>
+    );
+  }
+
+  // ✅ صفحة تسجيل الدخول
   if (!isAuthenticated) {
     return (
       <div className="admin-login">
         <form onSubmit={handleLogin} className="login-form">
-          <h2>🔐 Admin Login</h2>
+          <div className="login-icon">🔐</div>
+          <h2>Admin Login</h2>
+          <p>أدخل الـ Token للدخول</p>
           <input
             type="password"
             name="token"
@@ -203,7 +222,7 @@ const handleDelete = async (projectId) => {
             autoComplete="off"
           />
           <button type="submit" className="login-btn">
-            دخول
+            🚀 دخول
           </button>
         </form>
       </div>
@@ -215,23 +234,19 @@ const handleDelete = async (projectId) => {
       <header className="admin-header">
         <h1>📊 Admin Panel</h1>
         <div className="admin-actions">
-          <button 
-            onClick={() => setShowForm(true)} 
+          <button
+            onClick={() => setShowForm(true)}
             className="btn-primary"
             disabled={loading}
           >
             ➕ إضافة مشروع
           </button>
-          <button 
-            onClick={handleLogout} 
-            className="btn-secondary"
-          >
+          <button onClick={handleLogout} className="btn-secondary">
             🚪 خروج
           </button>
         </div>
       </header>
 
-      {/* نموذج الإضافة/التعديل */}
       {showForm && (
         <div className="modal-overlay" onClick={resetForm}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -239,7 +254,7 @@ const handleDelete = async (projectId) => {
               <h2>{editingProject ? '✏️ تعديل المشروع' : '➕ مشروع جديد'}</h2>
               <button onClick={resetForm} className="close-btn">✕</button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="project-form">
               <input
                 type="text"
@@ -249,7 +264,6 @@ const handleDelete = async (projectId) => {
                 required
                 disabled={loading}
               />
-              
               <input
                 type="text"
                 placeholder="الأدوات (مثال: React, Node.js)"
@@ -257,23 +271,20 @@ const handleDelete = async (projectId) => {
                 onChange={(e) => setFormData({...formData, tools: e.target.value})}
                 disabled={loading}
               />
-              
               <input
-                type="url"
+                type="text"
                 placeholder="رابط GitHub"
                 value={formData.repo}
                 onChange={(e) => setFormData({...formData, repo: e.target.value})}
                 disabled={loading}
               />
-              
               <input
-                type="url"
+                type="text"
                 placeholder="رابط المشروع الحي"
                 value={formData.view}
                 onChange={(e) => setFormData({...formData, view: e.target.value})}
                 disabled={loading}
               />
-              
               <select
                 value={formData.category}
                 onChange={(e) => setFormData({...formData, category: e.target.value})}
@@ -287,7 +298,6 @@ const handleDelete = async (projectId) => {
                 <option value="Mobile">Mobile</option>
                 <option value="UI/UX">UI/UX</option>
               </select>
-              
               <textarea
                 placeholder="وصف المشروع"
                 value={formData.body}
@@ -295,29 +305,18 @@ const handleDelete = async (projectId) => {
                 rows="4"
                 disabled={loading}
               />
-              
               <input
-                type="url"
+                type="text"
                 placeholder="رابط الصورة"
                 value={formData.urlImg}
                 onChange={(e) => setFormData({...formData, urlImg: e.target.value})}
                 disabled={loading}
               />
-              
               <div className="form-actions">
-                <button 
-                  type="submit" 
-                  className="btn-primary"
-                  disabled={loading}
-                >
+                <button type="submit" className="btn-primary" disabled={loading}>
                   {loading ? '⏳ جاري الحفظ...' : (editingProject ? '💾 تحديث' : '➕ إضافة')}
                 </button>
-                <button 
-                  type="button" 
-                  onClick={resetForm} 
-                  className="btn-secondary"
-                  disabled={loading}
-                >
+                <button type="button" onClick={resetForm} className="btn-secondary" disabled={loading}>
                   ✕ إلغاء
                 </button>
               </div>
@@ -326,10 +325,9 @@ const handleDelete = async (projectId) => {
         </div>
       )}
 
-      {/* قائمة المشاريع */}
       <div className="projects-section">
         <h3>المشاريع ({projects.length})</h3>
-        
+
         {projects.length === 0 ? (
           <div className="empty-state">
             <p>📭 لا توجد مشاريع</p>
@@ -356,12 +354,12 @@ const handleDelete = async (projectId) => {
                   <tr key={project._id}>
                     <td>
                       {project.urlImg ? (
-                        <img 
-                          src={project.urlImg} 
-                          alt={project.title} 
-                          className="project-thumb" 
+                        <img
+                          src={project.urlImg}
+                          alt={project.title}
+                          className="project-thumb"
                           onError={(e) => {
-                            e.target.src = '';
+                            e.target.src = 'https://placehold.co/60x60?text=No+Image';
                           }}
                         />
                       ) : (
@@ -369,30 +367,14 @@ const handleDelete = async (projectId) => {
                       )}
                     </td>
                     <td className="project-title">{project.title}</td>
-                    <td>
-                      <span className="category-badge">{project.category}</span>
-                    </td>
+                    <td><span className="category-badge">{project.category}</span></td>
                     <td className="project-tools">{project.tools || '-'}</td>
                     <td>{project.views || 0}</td>
                     <td>{project.likedBy?.length || 0}</td>
                     <td>
                       <div className="action-btns">
-                        <button 
-                          onClick={() => handleEdit(project)} 
-                          className="btn-edit"
-                          title="تعديل"
-                          disabled={loading}
-                        >
-                          ✏️
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(project._id)} 
-                          className="btn-delete"
-                          title="حذف"
-                          disabled={loading}
-                        >
-                          🗑️
-                        </button>
+                        <button onClick={() => handleEdit(project)} className="btn-edit" disabled={loading}>✏️</button>
+                        <button onClick={() => handleDelete(project._id)} className="btn-delete" disabled={loading}>🗑️</button>
                       </div>
                     </td>
                   </tr>

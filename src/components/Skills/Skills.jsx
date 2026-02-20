@@ -22,7 +22,7 @@ function Skills() {
             <p className='text-2xl'>Years experience</p>
           </div>
           <div className="achievement flex gap-1 items-center">
-            <h6 className='text-8xl'>+7</h6>
+            <h6 className='text-8xl'>+10</h6>
             <p className='text-2xl'>Projects</p>
           </div>
           <div className="achievement flex gap-1 items-center">

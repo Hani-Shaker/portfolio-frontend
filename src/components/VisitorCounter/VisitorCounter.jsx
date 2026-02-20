@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import './VisitorCounter.css';
+import { getApiUrl } from '../../utils/api';
 
 function VisitorCounter() {
   const [count, setCount] = useState(0);
@@ -9,15 +10,16 @@ function VisitorCounter() {
     fetchVisitorCount();
   }, []);
 
+
 const fetchVisitorCount = async () => {
   try {
-    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
-    const res = await fetch(`${API_URL}api/survey-count`);
+    const res = await fetch(getApiUrl('/api/survey-count'));  // ✅
     const data = await res.json();
     setCount(data.totalVisitors);
-    setLoading(false);
   } catch (error) {
-    console.error("Error:", error);
+    console.error("❌ Visitor count error:", error);
+    setCount(0);
+  } finally {
     setLoading(false);
   }
 };
