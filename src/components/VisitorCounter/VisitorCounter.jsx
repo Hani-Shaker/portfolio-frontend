@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import './VisitorCounter.css';
+import { useState, useEffect } from 'react';
 import { getApiUrl } from '../../utils/api';
+import './VisitorCounter.css';
 
 function VisitorCounter() {
   const [count, setCount] = useState(0);
@@ -10,28 +10,38 @@ function VisitorCounter() {
     fetchVisitorCount();
   }, []);
 
-
-const fetchVisitorCount = async () => {
-  try {
-    const res = await fetch(getApiUrl('/api/survey-count'));  // ✅
-    const data = await res.json();
-    setCount(data.totalVisitors);
-  } catch (error) {
-    console.error("❌ Visitor count error:", error);
-    setCount(0);
-  } finally {
-    setLoading(false);
-  }
-};
-
-  if (loading) return null;
+  const fetchVisitorCount = async () => {
+    try {
+      const res = await fetch(getApiUrl('/api/survey-count'));
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      
+      const data = await res.json();
+      setCount(data.totalVisitors);
+    } catch (error) {
+      console.error("❌ Visitor count error:", error);
+      setCount(0);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="visitor-counter">
-      <i className="fas fa-eye"></i>
-      <div className="visitor-info">
-        <p className="visitor-count">{count.toLocaleString('ar-EG')}</p>
-        <p className="visitor-label">زائر</p>
+      <div className="counter-content">
+        <i className="fas fa-users counter-icon"></i>
+        <div className="counter-text">
+          <span className="counter-label">Total Visitors</span>
+          <span className="counter-number">
+            {loading ? (
+              <i className="fas fa-spinner fa-spin"></i>
+            ) : (
+              count.toLocaleString()
+            )}
+          </span>
+        </div>
       </div>
     </div>
   );

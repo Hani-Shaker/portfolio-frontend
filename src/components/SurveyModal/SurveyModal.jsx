@@ -58,15 +58,10 @@ function SurveyModal({ onComplete }) {
     }
   };
 
-  const handleSkip = () => {
-    localStorage.setItem("surveyCompleted", "true");
-    onComplete(0);
-  };
 
   return (
     <div className="survey-modal-overlay">
       <div className="survey-modal">
-        <button onClick={handleSkip} className="skip-btn">✕</button>
         
         <div className="survey-icon">📋</div>
         <h2>استبيان سريع</h2>
@@ -131,14 +126,7 @@ function SurveyModal({ onComplete }) {
             >
               {loading ? '⏳ جاري الإرسال...' : '✅ إرسال'}
             </button>
-            <button 
-              type="button" 
-              onClick={handleSkip} 
-              className="skip-text-btn"
-              disabled={loading}
-            >
-              تخطي
-            </button>
+
           </div>
         </form>
       </div>
