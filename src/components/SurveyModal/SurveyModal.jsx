@@ -1,8 +1,17 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import './SurveyModal.css';
 import { getApiUrl } from '../../utils/api';
+import './SurveyModal.css';
 
+// ✅ Helper للحصول على User ID
+const getUserId = () => {
+  let userId = localStorage.getItem("userId");
+  if (!userId) {
+    userId = crypto.randomUUID();
+    localStorage.setItem("userId", userId);
+  }
+  return userId;
+};
 
 function SurveyModal({ onComplete }) {
   const [formData, setFormData] = useState({
@@ -12,25 +21,18 @@ function SurveyModal({ onComplete }) {
   });
   const [loading, setLoading] = useState(false);
 
-  const getUserId = () => {
-    let userId = localStorage.getItem("userId");
-    if (!userId) {
-      userId = crypto.randomUUID();
-      localStorage.setItem("userId", userId);
-    }
-    return userId;
-  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const handleSubmit = async () => {
     if (!formData.source || !formData.userType) {
-      toast.error('من فضلك أكمل جميع الحقول المطلوبة');
+      toast.error('من فضلك أكمل الحقول المطلوبة');
       return;
     }
 
     setLoading(true);
 
     try {
-      const res = await fetch(getApiUrl('/api/survey-submit'), {  // ✅
+      const res = await fetch(getApiUrl('/api/survey-submit'), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -56,13 +58,21 @@ function SurveyModal({ onComplete }) {
     }
   };
 
+  const handleSkip = () => {
+    localStorage.setItem("surveyCompleted", "true");
+    onComplete(0);
+  };
+
   return (
     <div className="survey-modal-overlay">
       <div className="survey-modal">
-        <h2>📋 استبيان سريع</h2>
+        <button onClick={handleSkip} className="skip-btn">✕</button>
+        
+        <div className="survey-icon">📋</div>
+        <h2>استبيان سريع</h2>
         <p>ساعدنا في تحسين موقعنا!</p>
 
-        <div className="survey-form">
+        <form onSubmit={handleSubmit} className="survey-form">
           {/* كيف عرفتنا */}
           <div className="form-group">
             <label>كيف وصلت إلينا؟ *</label>
@@ -70,12 +80,14 @@ function SurveyModal({ onComplete }) {
               value={formData.source}
               onChange={(e) => setFormData({...formData, source: e.target.value})}
               required
+              disabled={loading}
             >
               <option value="">اختر...</option>
               <option value="google">Google</option>
               <option value="facebook">Facebook</option>
-              <option value="twitter">Twitter</option>
+              <option value="twitter">Twitter / X</option>
               <option value="linkedin">LinkedIn</option>
+              <option value="github">GitHub</option>
               <option value="friend">صديق</option>
               <option value="other">أخرى</option>
             </select>
@@ -88,6 +100,7 @@ function SurveyModal({ onComplete }) {
               value={formData.userType}
               onChange={(e) => setFormData({...formData, userType: e.target.value})}
               required
+              disabled={loading}
             >
               <option value="">اختر...</option>
               <option value="client">عميل محتمل</option>
@@ -106,17 +119,28 @@ function SurveyModal({ onComplete }) {
               placeholder="example@email.com"
               value={formData.email}
               onChange={(e) => setFormData({...formData, email: e.target.value})}
+              disabled={loading}
             />
           </div>
 
-          <button 
-            onClick={handleSubmit} 
-            className="submit-btn"
-            disabled={loading}
-          >
-            {loading ? '⏳ جاري الإرسال...' : '✅ إرسال'}
-          </button>
-        </div>
+          <div className="form-actions">
+            <button 
+              type="submit" 
+              className="submit-btn"
+              disabled={loading}
+            >
+              {loading ? '⏳ جاري الإرسال...' : '✅ إرسال'}
+            </button>
+            <button 
+              type="button" 
+              onClick={handleSkip} 
+              className="skip-text-btn"
+              disabled={loading}
+            >
+              تخطي
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
