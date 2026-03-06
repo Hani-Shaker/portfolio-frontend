@@ -70,7 +70,7 @@ function SurveyModal({ onComplete }) {
         <form onSubmit={handleSubmit} className="survey-form">
           {/* كيف عرفتنا */}
           <div className="form-group">
-            <label>كيف وصلت إلينا؟ *</label>
+            <label>عرفتني ازاي؟: *</label>
             <select
               value={formData.source}
               onChange={(e) => setFormData({...formData, source: e.target.value})}
@@ -84,13 +84,14 @@ function SurveyModal({ onComplete }) {
               <option value="linkedin">LinkedIn</option>
               <option value="github">GitHub</option>
               <option value="friend">صديق</option>
+              <option value="mostaql">موقع مستقل</option>
               <option value="other">أخرى</option>
             </select>
           </div>
 
           {/* نوع المستخدم */}
           <div className="form-group">
-            <label>أنت: *</label>
+            <label>من انت: *</label>
             <select
               value={formData.userType}
               onChange={(e) => setFormData({...formData, userType: e.target.value})}

@@ -195,6 +195,32 @@ function AdminPanel() {
     setShowForm(false);
   };
 
+async function uploadImage() {
+
+  const file = document.getElementById("imageUpload").files[0];
+
+  const dataForm = new FormData();
+  dataForm.append("file", file);
+  dataForm.append("upload_preset", "portfolio_upload");
+
+  const res = await fetch(
+    "https://api.cloudinary.com/v1_1/dns5icwyq/image/upload",
+    {
+      method: "POST",
+      body: dataForm
+    }
+  );
+
+  const data = await res.json();
+
+  setFormData({
+    ...formData,
+    urlImg: data.secure_url
+  });
+
+  toast.success("تم رفع الصورة ✅");
+}
+
   // ✅ Loading أثناء تحميل الصفحة
   if (pageLoading) {
     return (
@@ -231,7 +257,7 @@ function AdminPanel() {
 
   return (
     <div className="admin-panel">
-      <header className="admin-header">
+      <header className="admin-header my-20">
         <h1>📊 Admin Panel</h1>
         <div className="admin-actions">
           <button
@@ -312,6 +338,17 @@ function AdminPanel() {
                 onChange={(e) => setFormData({...formData, urlImg: e.target.value})}
                 disabled={loading}
               />
+
+              <input type="file" id="imageUpload" />
+
+              <button
+                type="button"
+                onClick={uploadImage}
+                className='btn-secondary upload-btn'
+              >
+              Upload Image
+              </button>
+
               <div className="form-actions">
                 <button type="submit" className="btn-primary" disabled={loading}>
                   {loading ? '⏳ جاري الحفظ...' : (editingProject ? '💾 تحديث' : '➕ إضافة')}

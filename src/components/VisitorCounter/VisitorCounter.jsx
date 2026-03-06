@@ -33,7 +33,6 @@ function VisitorCounter() {
       <div className="counter-content">
         <i className="fas fa-users counter-icon"></i>
         <div className="counter-text">
-          <span className="counter-label">Total Visitors</span>
           <span className="counter-number">
             {loading ? (
               <i className="fas fa-spinner fa-spin"></i>
