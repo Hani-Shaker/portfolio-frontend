@@ -1,11 +1,11 @@
 import { Outlet } from 'react-router-dom';
 import Navbar from '../components/Navbar/Navbar';
-import ThemeToggle from '../components/ThemeToggle/ThemeToggle.jsx'; // ✅
+// import ThemeToggle from '../components/ThemeToggle/ThemeToggle.jsx'; // ✅
 
 function MainLayout() {
   return (
     <>
-      <ThemeToggle /> {/* ✅ */}
+      {/* <ThemeToggle /> ✅ */}
       <Navbar />
       <main>
         <Outlet />
