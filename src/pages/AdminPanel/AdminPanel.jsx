@@ -323,6 +323,7 @@ async function uploadImage() {
                 <option value="Backend">Backend</option>
                 <option value="Mobile">Mobile</option>
                 <option value="UI/UX">UI/UX</option>
+                <option value="Desktop App">Desktop App</option>
               </select>
               <textarea
                 placeholder="وصف المشروع"

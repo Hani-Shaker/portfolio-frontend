@@ -5,8 +5,6 @@ import { ProjectSkeleton } from '../Skeleton/Skeleton';
 // ✅ Helper function
 const getApiUrl = (endpoint) => {
   const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
-  // const cleanUrl = baseUrl.replace(/\/$/, '');
-  // const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   return `${baseUrl}${endpoint}`;
 };
 
@@ -26,7 +24,8 @@ function Projects() {
     { value: 'Full Stack', label: 'Full Stack' },
     { value: 'Frontend', label: 'Frontend' },
     { value: 'Backend', label: 'Backend' },
-    { value: 'Mobile', label: 'Mobile' }
+    { value: 'Mobile', label: 'Mobile' },
+    { value: 'Desktop App', label: 'Desktop App' }
   ];
 
   useEffect(() => {
