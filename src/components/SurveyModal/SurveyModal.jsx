@@ -15,6 +15,7 @@ const getUserId = () => {
 
 function SurveyModal({ onComplete }) {
   const [formData, setFormData] = useState({
+    userName: '',
     source: '',
     userType: '',
     email: ''
@@ -24,7 +25,7 @@ function SurveyModal({ onComplete }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.source || !formData.userType) {
+    if (!formData.userName || !formData.source || !formData.userType) {
       toast.error('من فضلك أكمل الحقول المطلوبة');
       return;
     }
@@ -62,12 +63,21 @@ function SurveyModal({ onComplete }) {
   return (
     <div className="survey-modal-overlay">
       <div className="survey-modal">
-        
-        <div className="survey-icon">📋</div>
         <h2>استبيان سريع</h2>
         <p>ساعدنا في تحسين موقعنا!</p>
 
         <form onSubmit={handleSubmit} className="survey-form">
+          {/*  الاسم */}
+           <div className="form-group">
+            <label>الاسم: *</label>
+            <input
+              type="text"
+              placeholder="أدخل اسمك"
+              value={formData.userName}
+              onChange={(e) => setFormData({...formData, userName: e.target.value})}
+              disabled={loading}
+            />
+          </div>
           {/* كيف عرفتنا */}
           <div className="form-group">
             <label>عرفتني ازاي؟: *</label>
